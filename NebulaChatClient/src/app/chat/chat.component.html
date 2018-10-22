@@ -1,0 +1,81 @@
+<style>
+#dialog-window {
+    width: 600px;
+    border: 1px black solid;
+}
+
+#scrollable-content {
+    overflow: auto;
+    background-color: #0000ff14;
+}
+#dialog-window, #scrollable-content {
+    height: 450px;
+}
+
+#footer {
+    height: 30px;
+    /* background-color: green; */
+    margin-top: 5px;
+}
+input, label {
+    display: inline-block;
+}
+</style>
+
+<div>
+    <h2>Chat</h2>
+    <div>
+        <h3>Top 10 Chatters</h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Message Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let item of topTen">
+                    <td>{{ item.user.firstName }} {{ item.user.lastName }} ({{item.user.username}})</td>
+                    <td>{{ item.messageCount }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div id="dialog-window">
+        <div id="scrollable-content">
+            <ul #postedMessages>
+                <li class="postedMessage" *ngFor="let message of messages">
+                    <span [ngbPopover]="getPopOverBody(message.author)" 
+                          triggers="mouseenter:mouseleave" 
+                          [popoverTitle]="getPopoverTitle(message.author)">{{ message.author.firstName }}</span>
+                     to 
+                    <span [ngbPopover]="getPopOverBody(message.recipient)" 
+                           triggers="mouseenter:mouseleave" 
+                           [popoverTitle]="getPopoverTitle(message.recipient)">{{ message.recipient.firstName }} </span> <small class="muted">({{message.createdDate | amTimeAgo}})</small>: {{ message.content }}
+                </li>
+            </ul>
+        </div>
+    </div>
+    <div id="footer">
+        <form (ngSubmit)="onSubmit()" [formGroup]="chatForm">
+            <div class="form-group">
+                <label for="recipientId">Message</label>
+                <select class="form-control" required formControlName="recipientId">
+                    <option value='null'>Send To</option>
+                        <option *ngFor="let user of users" [value]="user.id">{{user.username}}</option>
+                </select>
+                <div *ngIf="submitted && f.recipientId.errors" class="invalid-feedback">
+                    <div *ngIf="f.recipientId.errors.required"> Must select a recipient</div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="message">Message</label>
+                <input class="form-control" type="text" id="message" name="message" required formControlName="message" [ngClass]="{ 'is-invalid': submitted && f.message.errors }" >
+                <div *ngIf="submitted && f.message.errors" class="invalid-feedback">
+                    <div *ngIf="f.message.errors.required">Message is required</div>
+                </div>
+            </div>
+            <button class="btn btn-primary" type="submit" id="sendmessage" [disabled]="!chatForm.valid"> Send </button>
+        </form>
+    </div>
+</div>
